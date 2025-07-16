@@ -12,6 +12,10 @@ class InvalidJWTException(BibiliotecaException):
     detail = "Неверный токен"
 
 
+class JWTMissingException(BibiliotecaException):
+    detail = "Токен отсутствует"
+
+
 class PasswordTooShortException(BibiliotecaException):
     detail = "Пароль слишком короткий"
 
@@ -60,6 +64,11 @@ class BibliotecaHTTPException(HTTPException):
 class InvalidJWTHTTPException(BibliotecaHTTPException):
     status_code = 401
     detail = "Неверный токен"
+
+
+class JWTMissingHTTPException(BibliotecaHTTPException):
+    status_code = 401
+    detail = "Токен отсутствует"
 
 
 class PasswordTooShortHTTPException(BibliotecaHTTPException):

@@ -7,6 +7,8 @@ from passlib.context import CryptContext
 
 from src.config import settings
 from src.exceptions import (
+    InvalidJWTException,
+    JWTMissingException,
     ObjectAlreadyExistsException,
     UserAlreadyExistsException,
     UserAlreadyLoggedOutException,
@@ -59,3 +61,18 @@ class AuthService(BaseService):
             to_encode, key=settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM
         )
         return encoded_jwt
+
+    def get_token(self, request: Request) -> str:
+        try:
+            return request.cookies["access_token"]
+        except KeyError:
+            raise JWTMissingException
+
+    def decode_token(self, token: str) -> dict[str, Any]:
+        try:
+            return jwt.decode(token, key=settings.JWT_SECRET_KEY, algorithms=settings.JWT_ALGORITHM)  # type: ignore
+        except jwt.exceptions.DecodeError as _:
+            raise InvalidJWTException
+
+    async def get_user(self, user_id: str) -> str:
+        return await self.db.users.get_one(id=user_id)  # type: ignore

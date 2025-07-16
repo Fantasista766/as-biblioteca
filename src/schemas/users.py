@@ -11,7 +11,7 @@ class UserAddDTO(BaseModel):
 
 
 class UserDTO(BaseModel):
-    id: int
+    id: str
     first_name: str
     last_name: str
     email: EmailStr

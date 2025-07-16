@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Request, Response
 
-from src.api.dependencies import DBDep
+from src.api.dependencies import DBDep, UserIdDep
 from src.exceptions import (
     InvalidJWTException,
     InvalidJWTHTTPException,
@@ -60,3 +60,12 @@ async def logout_user(request: Request, response: Response):
     except UserAlreadyLoggedOutException:
         raise UserAlreadyLoggedOutHTTPException
     return {"status": "OK"}
+
+
+@router.get("/me", summary="☻ Мой профиль")
+# @cache(expire=10)
+async def get_me(db: DBDep, user_id: UserIdDep):
+    try:
+        return await AuthService(db).get_user(user_id)
+    except UserNotFoundException:
+        raise UserNotFoundHTTPException

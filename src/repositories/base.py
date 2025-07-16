@@ -62,6 +62,9 @@ class BaseRepository:
         Вернёт один документ по переданным ключам filter_by.
         Если не найден — бросит ObjectNotFoundException.
         """
+        if "id" in filter_by:
+            raw_id = filter_by.pop("id")
+            filter_by["_id"] = ObjectId(raw_id)
         document = await self.collection.find_one(filter_by)
         if not document:
             raise ObjectNotFoundException

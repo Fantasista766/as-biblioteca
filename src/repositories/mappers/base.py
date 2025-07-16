@@ -14,8 +14,7 @@ class DataMapper(Generic[SchemaType]):
             return None
 
         if "_id" in data:
-            hex_id = str(data.pop("_id"))
-            data["id"] = int(hex_id, 16)
+            data["id"] = str(data.pop("_id"))
 
         return cls.schema.model_validate(data)
 
