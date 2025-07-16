@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Response
+from fastapi import APIRouter, Request, Response
 
 from src.api.dependencies import DBDep
 from src.exceptions import (
@@ -8,6 +8,8 @@ from src.exceptions import (
     PasswordTooShortHTTPException,
     UserAlreadyExistsException,
     UserAlreadyExistsHTTPException,
+    UserAlreadyLoggedOutException,
+    UserAlreadyLoggedOutHTTPException,
     UserNotFoundException,
     UserNotFoundHTTPException,
     WrongPasswordException,
@@ -49,3 +51,12 @@ async def login_user(
         raise UserNotFoundHTTPException
     except WrongPasswordException:
         raise WrongPasswordHTTPException
+
+
+@router.post("/logout", summary="Выход из системы")
+async def logout_user(request: Request, response: Response):
+    try:
+        await AuthService().logout_user(request, response)
+    except UserAlreadyLoggedOutException:
+        raise UserAlreadyLoggedOutHTTPException
+    return {"status": "OK"}

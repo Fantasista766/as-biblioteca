@@ -16,6 +16,10 @@ class PasswordTooShortException(BibiliotecaException):
     detail = "Пароль слишком короткий"
 
 
+class UserAlreadyLoggedOutException(BibiliotecaException):
+    detail = "Вы ещё не аутентифицированы"
+
+
 class WrongPasswordException(BibiliotecaException):
     detail = "Неверный пароль"
 
@@ -66,6 +70,11 @@ class PasswordTooShortHTTPException(BibliotecaHTTPException):
 class UserAlreadyExistsHTTPException(BibliotecaHTTPException):
     status_code = 409
     detail = "Пользователь с таким email уже существует"
+
+
+class UserAlreadyLoggedOutHTTPException(BibliotecaHTTPException):
+    status_code = 409
+    detail = "Вы ещё не аутентифицированы"
 
 
 class UserNotFoundHTTPException(BibliotecaHTTPException):

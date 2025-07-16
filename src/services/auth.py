@@ -2,12 +2,14 @@ from datetime import datetime, timezone, timedelta
 from typing import Any
 import jwt
 
+from fastapi import Request, Response
 from passlib.context import CryptContext
 
 from src.config import settings
 from src.exceptions import (
     ObjectAlreadyExistsException,
     UserAlreadyExistsException,
+    UserAlreadyLoggedOutException,
     WrongPasswordException,
 )
 from src.schemas.users import UserAddDTO, UserLoginDTO, UserRegisterDTO
@@ -34,6 +36,11 @@ class AuthService(BaseService):
         user = await self.db.users.get_user_with_hashed_password(email=user_data.email)  # type: ignore
         self.verify_password(user_data.password, user.hashed_password)
         return self.create_access_token({"user_id": user.id})
+
+    async def logout_user(self, request: Request, response: Response) -> None:
+        if "access_token" not in request.cookies:
+            raise UserAlreadyLoggedOutException
+        response.delete_cookie("access_token")
 
     def hash_password(self, password: str) -> str:
         return self.pwd_context.hash(password)
