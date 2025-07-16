@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Request, Response
 
+from src.api.decorators import cache
 from src.api.dependencies import DBDep, UserIdDep
 from src.exceptions import (
     InvalidJWTException,
@@ -63,7 +64,7 @@ async def logout_user(request: Request, response: Response):
 
 
 @router.get("/me", summary="☻ Мой профиль")
-# @cache(expire=10)
+@cache(expire=10)
 async def get_me(db: DBDep, user_id: UserIdDep):
     try:
         return await AuthService(db).get_user(user_id)
