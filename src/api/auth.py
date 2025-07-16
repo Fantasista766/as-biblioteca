@@ -1,13 +1,19 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Response
 
 from src.api.dependencies import DBDep
 from src.exceptions import (
+    InvalidJWTException,
+    InvalidJWTHTTPException,
     PasswordTooShortException,
     PasswordTooShortHTTPException,
     UserAlreadyExistsException,
     UserAlreadyExistsHTTPException,
+    UserNotFoundException,
+    UserNotFoundHTTPException,
+    WrongPasswordException,
+    WrongPasswordHTTPException,
 )
-from src.schemas.users import UserRegisterDTO
+from src.schemas.users import UserLoginDTO, UserRegisterDTO
 from src.services.auth import AuthService
 
 router = APIRouter(prefix="/auth", tags=["Авторизация и аутентификация"])
@@ -25,3 +31,21 @@ async def register_user(
         raise PasswordTooShortHTTPException
     except UserAlreadyExistsException:
         raise UserAlreadyExistsHTTPException
+
+
+@router.post("/login", summary="Аутентификация пользователя")
+async def login_user(
+    db: DBDep,
+    user_data: UserLoginDTO,
+    response: Response,
+) -> dict[str, str]:
+    try:
+        access_token = await AuthService(db).login_user(user_data)
+        response.set_cookie("access_token", access_token)
+        return {"access_token": access_token}
+    except InvalidJWTException:
+        raise InvalidJWTHTTPException
+    except UserNotFoundException:
+        raise UserNotFoundHTTPException
+    except WrongPasswordException:
+        raise WrongPasswordHTTPException

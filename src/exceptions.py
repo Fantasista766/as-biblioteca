@@ -8,8 +8,16 @@ class BibiliotecaException(Exception):
         super().__init__(self.detail, *args, **kwargs)
 
 
+class InvalidJWTException(BibiliotecaException):
+    detail = "Неверный токен"
+
+
 class PasswordTooShortException(BibiliotecaException):
     detail = "Пароль слишком короткий"
+
+
+class WrongPasswordException(BibiliotecaException):
+    detail = "Неверный пароль"
 
 
 ################################# ALREADY EXISTS EXCEPTIONS #################################
@@ -45,11 +53,26 @@ class BibliotecaHTTPException(HTTPException):
         super().__init__(self.status_code, self.detail, *args, **kwargs)
 
 
-class UserAlreadyExistsHTTPException(BibliotecaHTTPException):
-    status_code = 409
-    detail = "Пользователь с таким email уже существует"
+class InvalidJWTHTTPException(BibliotecaHTTPException):
+    status_code = 401
+    detail = "Неверный токен"
 
 
 class PasswordTooShortHTTPException(BibliotecaHTTPException):
     status_code = 422
     detail = "Пароль слишком короткий"
+
+
+class UserAlreadyExistsHTTPException(BibliotecaHTTPException):
+    status_code = 409
+    detail = "Пользователь с таким email уже существует"
+
+
+class UserNotFoundHTTPException(BibliotecaHTTPException):
+    status_code = 404
+    detail = "Пользователь не найден"
+
+
+class WrongPasswordHTTPException(BibliotecaHTTPException):
+    status_code = 401
+    detail = "Неверный пароль"

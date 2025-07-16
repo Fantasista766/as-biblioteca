@@ -1,5 +1,6 @@
 from typing import Any
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
+import logging
 
 from src.repositories.users import UsersRepository
 
@@ -18,4 +19,10 @@ class DBManager:
         self.client.close()
 
     async def init_indexes(self):
+        logging.info(
+            f"Начинаю инициализацию индексов в базе данных host={self.db.client.HOST}, port={self.db.client.PORT}"
+        )
         await self.db["users"].create_index("email", unique=True, name="unique_email_idx")
+        logging.info(
+            f"Успешная инициализация индексов в базе данных host={self.db.client.HOST}, port={self.db.client.PORT}"
+        )
