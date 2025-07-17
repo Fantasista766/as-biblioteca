@@ -110,7 +110,9 @@ class BaseRepository:
         Сначала проверяет, что документ существует (через get_one), иначе бросает ObjectNotFoundException.
         Возвращает количество изменённых полей (modified_count).
         """
-        await self.get_one(**filter_by)
+        if "id" in filter_by:
+            raw_id = filter_by.pop("id")
+            filter_by["_id"] = ObjectId(raw_id)
         update_data = data.model_dump(exclude_unset=exclude_unset)
         result = await self.collection.update_one(filter_by, {"$set": update_data})
 

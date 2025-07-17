@@ -23,7 +23,14 @@ class UsersRepository(BaseRepository):
         # Ищем документ, сразу проецируем только нужные поля
         document: dict[str, Any] | None = await self.collection.find_one(
             {"email": email},
-            {"email": 1, "hashed_password": 1, "_id": 1, "first_name": 1, "last_name": 1},
+            {
+                "email": 1,
+                "hashed_password": 1,
+                "_id": 1,
+                "first_name": 1,
+                "last_name": 1,
+                "role": 1,
+            },
         )
         if not document:
             raise UserNotFoundException

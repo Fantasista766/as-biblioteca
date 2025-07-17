@@ -18,7 +18,7 @@ from src.exceptions import (
     WrongPasswordException,
     WrongPasswordHTTPException,
 )
-from src.schemas.users import UserLoginDTO, UserRegisterDTO
+from src.schemas.users import UserLoginDTO, UserRegisterDTO, UserPutDTO
 from src.services.auth import AuthService
 
 router = APIRouter(prefix="/auth", tags=["Авторизация и аутентификация"])
@@ -57,6 +57,21 @@ async def login_user(
         raise UserNotFoundHTTPException
     except WrongPasswordException:
         raise WrongPasswordHTTPException
+
+
+@router.put("/edit_me", summary="Обновление профиля пользователя")
+async def edit_me(
+    db: DBDep,
+    user_id: UserIdDep,
+    user_data: UserPutDTO,
+) -> dict[str, str]:
+    try:
+        await AuthService(db).edit_user(user_id, user_data)
+        return {"status": "OK"}
+    except UserNotFoundException:
+        raise UserNotFoundHTTPException
+    except UserAlreadyExistsException:
+        raise UserAlreadyExistsHTTPException
 
 
 @router.post("/logout", summary="Выход из системы")

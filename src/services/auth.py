@@ -13,9 +13,10 @@ from src.exceptions import (
     UserAlreadyExistsException,
     UserAlreadyLoggedInException,
     UserAlreadyLoggedOutException,
+    UserNotFoundException,
     WrongPasswordException,
 )
-from src.schemas.users import UserAddDTO, UserLoginDTO, UserRegisterDTO
+from src.schemas.users import UserAddDTO, UserLoginDTO, UserRegisterDTO, UserPutDTO, UserPutRequest
 from src.services.base import BaseService
 
 
@@ -29,6 +30,7 @@ class AuthService(BaseService):
             last_name=user_data.last_name,
             email=user_data.email,
             hashed_password=hashed_password,
+            role=user_data.role,
         )
         try:
             await self.db.users.add(new_user_data)  # type: ignore
@@ -40,12 +42,26 @@ class AuthService(BaseService):
             raise UserAlreadyLoggedInException
         user = await self.db.users.get_user_with_hashed_password(email=user_data.email)  # type: ignore
         self.verify_password(user_data.password, user.hashed_password)
-        return self.create_access_token({"user_id": user.id})
+        return self.create_access_token({"user_id": user.id, "role": user.role})
 
     async def logout_user(self, request: Request, response: Response) -> None:
         if "access_token" not in request.cookies:
             raise UserAlreadyLoggedOutException
         response.delete_cookie("access_token")
+
+    async def edit_user(self, user_id: str, user_data: UserPutDTO) -> None:
+        user = await self.db.users.get_one(id=user_id)
+        if not user:
+            raise UserNotFoundException
+
+        hashed_password = self.hash_password(user_data.password)
+        new_user_data = UserPutRequest(
+            first_name=user_data.first_name,
+            last_name=user_data.last_name,
+            email=user_data.email,
+            hashed_password=hashed_password,
+        )
+        await self.db.users.edit(new_user_data, exclude_unset=True, id=user_id)
 
     def hash_password(self, password: str) -> str:
         return self.pwd_context.hash(password)
