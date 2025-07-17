@@ -11,6 +11,7 @@ from src.exceptions import (
     JWTMissingException,
     ObjectAlreadyExistsException,
     UserAlreadyExistsException,
+    UserAlreadyLoggedInException,
     UserAlreadyLoggedOutException,
     WrongPasswordException,
 )
@@ -34,7 +35,9 @@ class AuthService(BaseService):
         except ObjectAlreadyExistsException:
             raise UserAlreadyExistsException
 
-    async def login_user(self, user_data: UserLoginDTO) -> str:
+    async def login_user(self, request: Request, user_data: UserLoginDTO) -> str:
+        if "access_token" in request.cookies:
+            raise UserAlreadyLoggedInException
         user = await self.db.users.get_user_with_hashed_password(email=user_data.email)  # type: ignore
         self.verify_password(user_data.password, user.hashed_password)
         return self.create_access_token({"user_id": user.id})

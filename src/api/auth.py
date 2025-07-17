@@ -9,6 +9,8 @@ from src.exceptions import (
     PasswordTooShortHTTPException,
     UserAlreadyExistsException,
     UserAlreadyExistsHTTPException,
+    UserAlreadyLoggedInException,
+    UserAlreadyLoggedInHTTPException,
     UserAlreadyLoggedOutException,
     UserAlreadyLoggedOutHTTPException,
     UserNotFoundException,
@@ -40,14 +42,17 @@ async def register_user(
 async def login_user(
     db: DBDep,
     user_data: UserLoginDTO,
+    request: Request,
     response: Response,
 ) -> dict[str, str]:
     try:
-        access_token = await AuthService(db).login_user(user_data)
+        access_token = await AuthService(db).login_user(request, user_data)
         response.set_cookie("access_token", access_token)
         return {"access_token": access_token}
     except InvalidJWTException:
         raise InvalidJWTHTTPException
+    except UserAlreadyLoggedInException:
+        raise UserAlreadyLoggedInHTTPException
     except UserNotFoundException:
         raise UserNotFoundHTTPException
     except WrongPasswordException:
