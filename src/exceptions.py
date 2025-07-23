@@ -1,41 +1,41 @@
 from fastapi.exceptions import HTTPException
 
 
-class BibiliotecaException(Exception):
+class BibliotecaException(Exception):
     detail = "Неожиданная ошибка"
 
     def __init__(self, *args, **kwargs):
         super().__init__(self.detail, *args, **kwargs)
 
 
-class InvalidJWTException(BibiliotecaException):
+class InvalidJWTException(BibliotecaException):
     detail = "Неверный токен"
 
 
-class JWTMissingException(BibiliotecaException):
+class JWTMissingException(BibliotecaException):
     detail = "Токен отсутствует"
 
 
-class PasswordTooShortException(BibiliotecaException):
+class PasswordTooShortException(BibliotecaException):
     detail = "Пароль слишком короткий"
 
 
-class UserAlreadyLoggedInException(BibiliotecaException):
+class UserAlreadyLoggedInException(BibliotecaException):
     detail = "Вы уже аутентифицированы"
 
 
-class UserAlreadyLoggedOutException(BibiliotecaException):
+class UserAlreadyLoggedOutException(BibliotecaException):
     detail = "Вы ещё не аутентифицированы"
 
 
-class WrongPasswordException(BibiliotecaException):
+class WrongPasswordException(BibliotecaException):
     detail = "Неверный пароль"
 
 
 ################################# ALREADY EXISTS EXCEPTIONS #################################
 
 
-class ObjectAlreadyExistsException(BibiliotecaException):
+class ObjectAlreadyExistsException(BibliotecaException):
     detail = "Объект уже существует"
 
 
@@ -46,7 +46,7 @@ class UserAlreadyExistsException(ObjectAlreadyExistsException):
 ################################# NOT FOUND EXCEPTIONS #################################
 
 
-class ObjectNotFoundException(BibiliotecaException):
+class ObjectNotFoundException(BibliotecaException):
     detail = "Объект не найден"
 
 
