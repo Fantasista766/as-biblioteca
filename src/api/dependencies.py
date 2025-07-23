@@ -52,3 +52,6 @@ def abac_required(action, resource_getter: Callable[[Request], dict[str, any]] |
         return True
 
     return Annotated[bool, Depends(is_permitted)]
+
+
+EditUserPermissionDep = abac_required("user:edit")

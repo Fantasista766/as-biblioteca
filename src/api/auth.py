@@ -2,7 +2,7 @@ from fastapi import APIRouter, Request, Response
 
 from src.abac import access_manager
 from src.api.decorators import cache
-from src.api.dependencies import DBDep, UserIdDep
+from src.api.dependencies import DBDep, EditUserPermissionDep, UserIdDep
 from src.exceptions import (
     InvalidJWTException,
     InvalidJWTHTTPException,
@@ -75,7 +75,9 @@ async def edit_me(
         raise UserAlreadyExistsHTTPException
 
 
-@router.put("/edit_user", summary="Обновление профиля пользователя")
+@router.put(
+    "/edit_user", summary="Обновление профиля пользователя", dependencies=[EditUserPermissionDep]
+)
 async def edit_user(
     user_edit_email: str,
     db: DBDep,
