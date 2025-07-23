@@ -16,7 +16,14 @@ from src.exceptions import (
     UserNotFoundException,
     WrongPasswordException,
 )
-from src.schemas.users import UserAddDTO, UserLoginDTO, UserRegisterDTO, UserPutDTO, UserPutRequest
+from src.schemas.users import (
+    UserAddDTO,
+    UserLoginDTO,
+    UserRegisterDTO,
+    UserPutAdminDTO,
+    UserPutDTO,
+    UserPutRequest,
+)
 from src.services.base import BaseService
 
 
@@ -61,7 +68,20 @@ class AuthService(BaseService):
             email=user_data.email,
             hashed_password=hashed_password,
         )
-        await self.db.users.edit(new_user_data, exclude_unset=True, id=user_id)
+        try:
+            await self.db.users.edit(new_user_data, exclude_unset=True, id=user_id)
+        except ObjectAlreadyExistsException:
+            raise UserAlreadyExistsException
+
+    async def admin_edit_user(self, user_email: str, user_data: UserPutAdminDTO) -> None:
+        user = await self.db.users.get_one(email=user_email)
+        if not user:
+            raise UserNotFoundException
+
+        try:
+            await self.db.users.edit(user_data, exclude_unset=True, email=user_email)
+        except ObjectAlreadyExistsException:
+            raise UserAlreadyExistsException
 
     def hash_password(self, password: str) -> str:
         return self.pwd_context.hash(password)
@@ -93,5 +113,6 @@ class AuthService(BaseService):
         except jwt.exceptions.DecodeError as _:
             raise InvalidJWTException
 
-    async def get_user(self, user_id: str) -> str:
-        return await self.db.users.get_one(id=user_id)  # type: ignore
+    async def get_user_role(self, user_id: str) -> str:
+        user = await self.db.users.get_one(id=user_id)  # type: ignore
+        return user.role

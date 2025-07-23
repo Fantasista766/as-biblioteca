@@ -1,7 +1,8 @@
-from typing import Annotated
+from typing import Annotated, Callable
 
 from fastapi import Depends, Request
 
+from src.abac import access_manager
 from src.config import settings
 from src.exceptions import JWTMissingException, JWTMissingHTTPException
 from src.services.auth import AuthService
@@ -35,11 +36,19 @@ async def get_current_user_id(token: str = Depends(get_token)) -> int:
 UserIdDep = Annotated[int, Depends(get_current_user_id)]
 
 
-async def is_permitted(request: Request, role: str, user_id: UserIdDep) -> bool:
-    user_role = await AuthService().get_user_role(user_id)
-    if user_role != role:
-        raise PermissionError(f"User does not have the required role: {role}")
-    return True
+async def _get_subject(request: Request) -> dict[str, any]:
+    token = await get_token(request)
+    data = AuthService().decode_token(token)
+    user = await AuthService().get_user(data["user_id"])
+    return {"id": user.id, "role": user.role}
 
 
-RoleDep = Annotated[bool, Depends(is_permitted)]
+def abac_required(action, resource_getter: Callable[[Request], dict[str, any]] | None = None):
+    async def is_permitted(request: Request) -> bool:
+        subject = await _get_subject(request)
+        resource = resource_getter(request) if resource_getter else {}
+        if not access_manager.check(action, subject, resource):
+            raise PermissionError
+        return True
+
+    return Annotated[bool, Depends(is_permitted)]

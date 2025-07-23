@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Request, Response
 
+from src.abac import access_manager
 from src.api.decorators import cache
 from src.api.dependencies import DBDep, UserIdDep
 from src.exceptions import (
@@ -59,7 +60,7 @@ async def login_user(
         raise WrongPasswordHTTPException
 
 
-@router.put("/edit_me", summary="Обновление профиля пользователя")
+@router.put("/edit_me", summary="Обновление своего профиля")
 async def edit_me(
     db: DBDep,
     user_id: UserIdDep,
@@ -67,6 +68,26 @@ async def edit_me(
 ) -> dict[str, str]:
     try:
         await AuthService(db).edit_user(user_id, user_data)
+        return {"status": "OK"}
+    except UserNotFoundException:
+        raise UserNotFoundHTTPException
+    except UserAlreadyExistsException:
+        raise UserAlreadyExistsHTTPException
+
+
+@router.put("/edit_user", summary="Обновление профиля пользователя")
+async def edit_user(
+    user_edit_email: str,
+    db: DBDep,
+    user_id: UserIdDep,
+    user_data: UserPutDTO,
+) -> dict[str, str]:
+    subject_role = await AuthService(db).get_user_role(user_id)
+    subject = {"id": user_id, "role": subject_role}
+    if not access_manager.check("user:edit", subject):
+        raise PermissionError
+    try:
+        await AuthService(db).admin_edit_user(user_edit_email, user_data)
         return {"status": "OK"}
     except UserNotFoundException:
         raise UserNotFoundHTTPException

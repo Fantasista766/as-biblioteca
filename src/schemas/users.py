@@ -29,6 +29,12 @@ class UserPutDTO(UserLoginDTO):
     last_name: str = Field(..., min_length=2)
 
 
+class UserPutAdminDTO(BaseModel):
+    email: EmailStr
+    first_name: str = Field(..., min_length=2)
+    last_name: str = Field(..., min_length=2)
+
+
 class UserPutRequest(BaseModel):
     email: EmailStr
     hashed_password: str

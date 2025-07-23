@@ -40,7 +40,7 @@ class ObjectAlreadyExistsException(BibliotecaException):
 
 
 class UserAlreadyExistsException(ObjectAlreadyExistsException):
-    detail = "Пользователь уже существует"
+    detail = "Пользователь с таким Email уже существует"
 
 
 ################################# NOT FOUND EXCEPTIONS #################################

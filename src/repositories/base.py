@@ -114,7 +114,10 @@ class BaseRepository:
             raw_id = filter_by.pop("id")
             filter_by["_id"] = ObjectId(raw_id)
         update_data = data.model_dump(exclude_unset=exclude_unset)
-        result = await self.collection.update_one(filter_by, {"$set": update_data})
+        try:
+            result = await self.collection.update_one(filter_by, {"$set": update_data})
+        except DuplicateKeyError:
+            raise ObjectAlreadyExistsException
 
         return result.modified_count
 
