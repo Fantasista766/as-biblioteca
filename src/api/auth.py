@@ -19,7 +19,7 @@ from src.exceptions import (
     WrongPasswordException,
     WrongPasswordHTTPException,
 )
-from src.schemas.users import UserLoginDTO, UserRegisterDTO, UserPutDTO
+from src.schemas.users import UserLoginDTO, UserRegisterDTO, UserPutDTO, UserPutAdminDTO
 from src.services.auth import AuthService
 
 router = APIRouter(prefix="/auth", tags=["Авторизация и аутентификация"])
@@ -80,7 +80,7 @@ async def edit_user(
     user_edit_email: str,
     db: DBDep,
     user_id: UserIdDep,
-    user_data: UserPutDTO,
+    user_data: UserPutAdminDTO,
 ) -> dict[str, str]:
     subject_role = await AuthService(db).get_user_role(user_id)
     subject = {"id": user_id, "role": subject_role}
