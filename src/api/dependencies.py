@@ -1,4 +1,4 @@
-from typing import Annotated, Any
+from typing import Annotated
 
 from fastapi import Depends, Request
 
@@ -35,12 +35,11 @@ async def get_current_user_id(token: str = Depends(get_token)) -> int:
 UserIdDep = Annotated[int, Depends(get_current_user_id)]
 
 
-async def is_permitted(request: Request, role: str) -> bool:
-    user_id = await get_current_user_id()
+async def is_permitted(request: Request, role: str, user_id: UserIdDep) -> bool:
     user_role = await AuthService().get_user_role(user_id)
     if user_role != role:
         raise PermissionError(f"User does not have the required role: {role}")
     return True
 
 
-RoleDep = Annotated[str, Depends(is_permitted)]
+RoleDep = Annotated[bool, Depends(is_permitted)]

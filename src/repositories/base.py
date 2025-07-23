@@ -55,7 +55,7 @@ class BaseRepository:
         """
         document = await self.collection.find_one(filter_by)
 
-        self.mapper.map_to_domain_entity(document)
+        return self.mapper.map_to_domain_entity(document)
 
     async def get_one(self, **filter_by: Any) -> Any:
         """
@@ -95,7 +95,7 @@ class BaseRepository:
         try:
             result = await self.collection.insert_many(docs, ordered=False)
         except BulkWriteError:
-            ObjectAlreadyExistsException
+            raise ObjectAlreadyExistsException
 
         # получаем вставленные документы по их _id (чтобы получить все поля, включая _id)
         inserted_ids = result.inserted_ids
